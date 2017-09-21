@@ -554,7 +554,7 @@ class StudentProctoredExamAttemptCollection(AuthenticatedAPIView):
                 # resolve the LMS url, note we can't assume we're running in
                 # a same process as the LMS
                 exam_url_path = reverse(
-                    'courseware.views.jump_to',
+                    'courseware.views.views.jump_to',
                     args=[exam['course_id'], exam['content_id']]
                 )
             except NoReverseMatch:
