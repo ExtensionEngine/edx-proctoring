@@ -17,6 +17,13 @@
             accessibility_time_string: '',
             lastFetched: new Date()
         },
+
+        fetch: function (options) {
+            options = options || {};
+            options.cache = false;
+            return Backbone.Model.prototype.fetch.call(this, options);
+        },
+        
         getFormattedRemainingTime: function (secondsLeft) {
             /* since we can have a small grace period, we can end in the negative numbers */
             if (secondsLeft < 0)
