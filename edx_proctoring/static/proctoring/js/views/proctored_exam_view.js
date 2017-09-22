@@ -167,8 +167,8 @@ var edx = edx || {};
             if (self.secondsLeft <= -self.grace_period_secs) {
                 clearInterval(self.timerId); // stop the timer once the time finishes.
                 $(window).unbind('beforeunload', this.unloadMessage);
-                // refresh the page when the timer expired
-                self.reloadPage();
+                // open the exam page when the timer expired
+                location.href = self.model.get('exam_url_path');
             }
         }
     });
