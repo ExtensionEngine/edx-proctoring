@@ -466,8 +466,8 @@ class ProctoredExamStudentAttemptAdmin(admin.ModelAdmin):
         return False
 
     def has_delete_permission(self, request, obj=None):
-        """Don't allow deletes"""
-        return False
+        """Allow deletes (NDPD-685)"""
+        return True
 
 
 def prettify_course_id(course_id):
