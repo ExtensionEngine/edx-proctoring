@@ -407,6 +407,7 @@ class ProctoredExamStudentAttemptAdmin(admin.ModelAdmin):
         'attempt_code',
         'external_id',
         'allowed_time_limit_mins',
+        'added_allowance',
         'taking_as_proctored',
         'is_sample_attempt',
         'student_name',
