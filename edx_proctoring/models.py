@@ -743,7 +743,7 @@ class ProctoredExamStudentAllowance(TimeStampedModel):
 
         if not cls.is_allowance_value_valid(key, value):
             err_msg = (
-                'allowance_value "{value}" should be non-negative integer value.'
+                'Additional Time "{value}" should be non-negative integer value.'
             ).format(value=value)
             raise AllowanceValueNotAllowedException(err_msg)
         # were we passed a PK?
