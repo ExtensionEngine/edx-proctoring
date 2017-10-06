@@ -16,6 +16,7 @@ class ProctoredExamSerializer(serializers.ModelSerializer):
     """
     id = serializers.IntegerField(required=False)
     course_id = serializers.CharField(required=True)
+    section_name = serializers.CharField() # @TODO set required=True after all existing exams have been updated
     content_id = serializers.CharField(required=True)
     external_id = serializers.CharField(required=True)
     exam_name = serializers.CharField(required=True)
@@ -34,7 +35,7 @@ class ProctoredExamSerializer(serializers.ModelSerializer):
         model = ProctoredExam
 
         fields = (
-            "id", "course_id", "content_id", "external_id", "exam_name",
+            "id", "course_id", "section_name", "content_id", "external_id", "exam_name",
             "time_limit_mins", "is_proctored", "is_practice_exam", "is_active",
             "due_date", "hide_after_due"
         )

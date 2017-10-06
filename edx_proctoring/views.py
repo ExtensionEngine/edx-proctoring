@@ -122,6 +122,7 @@ class ProctoredExamView(AuthenticatedAPIView):
     Creates a new Exam.
     Expected POST data: {
         "course_id": "edX/DemoX/Demo_Course",
+        "section_name": "Intro",
         "content_id": 123,
         "exam_name": "Midterm",
         "time_limit_mins": 90,
@@ -133,6 +134,7 @@ class ProctoredExamView(AuthenticatedAPIView):
 
     **POST data Parameters**
         * course_id: The unique identifier for the course.
+        * section_name: Name of the section in which the exam is located in.
         * content_id: This will be the pointer to the id of the piece of course_ware which is the proctored exam.
         * exam_name: This is the display name of the Exam (Midterm etc).
         * time_limit_mins: Time limit (in minutes) that a student can finish this exam.

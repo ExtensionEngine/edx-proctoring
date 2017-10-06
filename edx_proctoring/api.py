@@ -56,8 +56,8 @@ log = logging.getLogger(__name__)
 SHOW_EXPIRY_MESSAGE_DURATION = 1 * 60  # duration within which expiry message is shown for a timed-out exam
 
 
-def create_exam(course_id, content_id, exam_name, time_limit_mins, due_date=None,
-                is_proctored=True, is_practice_exam=False, external_id=None, is_active=True, hide_after_due=False):
+def create_exam(course_id, content_id, exam_name, time_limit_mins, due_date=None, is_proctored=True,
+                is_practice_exam=False, external_id=None, is_active=True, hide_after_due=False, section_name=None):
     """
     Creates a new ProctoredExam entity, if the course_id/content_id pair do not already exist.
     If that pair already exists, then raise exception.
@@ -70,6 +70,7 @@ def create_exam(course_id, content_id, exam_name, time_limit_mins, due_date=None
 
     proctored_exam = ProctoredExam.objects.create(
         course_id=course_id,
+        section_name=section_name,
         content_id=content_id,
         external_id=external_id,
         exam_name=exam_name,
@@ -202,8 +203,8 @@ def get_review_policy_by_exam_id(exam_id):
     return ProctoredExamReviewPolicySerializer(exam_review_policy).data
 
 
-def update_exam(exam_id, exam_name=None, time_limit_mins=None, due_date=constants.MINIMUM_TIME,
-                is_proctored=None, is_practice_exam=None, external_id=None, is_active=None, hide_after_due=None):
+def update_exam(exam_id, exam_name=None, time_limit_mins=None, due_date=constants.MINIMUM_TIME, is_proctored=None,
+                is_practice_exam=None, external_id=None, is_active=None, hide_after_due=None, section_name=None):
     """
     Given a Django ORM id, update the existing record, otherwise raise exception if not found.
     If an argument is not passed in, then do not change it's current value.
@@ -243,6 +244,8 @@ def update_exam(exam_id, exam_name=None, time_limit_mins=None, due_date=constant
         proctored_exam.is_active = is_active
     if hide_after_due is not None:
         proctored_exam.hide_after_due = hide_after_due
+    if section_name: #@TODO: remove after all exams have been updated
+        proctored_exam.section_name = section_name
     proctored_exam.save()
 
     # read back exam so we can emit an event on it
@@ -260,6 +263,7 @@ def get_exam_by_id(exam_id):
     e.g.
     {
         "course_id": "edX/DemoX/Demo_Course",
+        "section_name": "Intro",
         "content_id": "123",
         "external_id": "",
         "exam_name": "Midterm",
@@ -284,6 +288,7 @@ def get_exam_by_content_id(course_id, content_id):
     e.g.
     {
         "course_id": "edX/DemoX/Demo_Course",
+        "section_name": "Intro",
         "content_id": "123",
         "external_id": "",
         "exam_name": "Midterm",
@@ -1023,6 +1028,7 @@ def get_all_exams_for_course(course_id, timed_exams_only=False, active_only=Fals
     e.g.
     [{
         "course_id": "edX/DemoX/Demo_Course",
+        "section_name": "Intro",
         "content_id": "123",
         "external_id": "",
         "exam_name": "Midterm",
@@ -1505,7 +1511,6 @@ def _get_timed_exam_view(exam, context, exam_id, user_id, course_id):
             # that we are running in-proc with the edx-platform LMS
             # (for example unit tests)
             pass
-
         django_context.update({
             'total_time': total_time,
             'hide_extra_time_footer': hide_extra_time_footer,
