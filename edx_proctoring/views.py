@@ -9,6 +9,7 @@ from datetime import datetime
 from django.utils.translation import ugettext as _
 from django.utils.decorators import method_decorator
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse, NoReverseMatch
 
 from rest_framework import status
@@ -750,12 +751,25 @@ class ExamAllowanceView(AuthenticatedAPIView):
         """
         HTTP GET handler. Adds or updates Allowance
         """
+        exam_id = request.data.get('exam_id', None)
+        username = request.data.get('user_info', None)
+        allowance_minutes = request.data.get('value', None)
+
+        if not (exam_id and username):
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data={"detail": 'exam_id and/or username missing'}
+            )
+
+        user = User.objects.get(username=username)
+        ProctoredExamStudentAttempt.objects.add_allowance_to_attempt(user.id, exam_id, allowance_minutes)
+
         try:
             return Response(add_allowance_for_user(
-                exam_id=request.data.get('exam_id', None),
-                user_info=request.data.get('user_info', None),
+                exam_id=exam_id,
+                user_info=username,
                 key=request.data.get('key', None),
-                value=request.data.get('value', None)
+                value=allowance_minutes
             ))
 
         except (AllowanceValueNotAllowedException, UserNotFoundException, ProctoredExamNotActiveException) as ex:
@@ -770,9 +784,20 @@ class ExamAllowanceView(AuthenticatedAPIView):
         """
         HTTP DELETE handler. Removes Allowance.
         """
+        exam_id = request.data.get('exam_id', None)
+        user_id = request.data.get('user_id', None)
+
+        if not (exam_id and user_id):
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data={"detail": 'exam_id and/or user_id missing'}
+            )
+
+        ProctoredExamStudentAttempt.objects.remove_allowance_from_attempt(user_id, exam_id)
+
         return Response(remove_allowance_for_user(
-            exam_id=request.data.get('exam_id', None),
-            user_id=request.data.get('user_id', None),
+            exam_id=exam_id,
+            user_id=user_id,
             key=request.data.get('key', None)
         ))
 

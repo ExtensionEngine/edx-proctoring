@@ -55,7 +55,7 @@
         </tr>
         <tr>
             <td>
-                <label><%- gettext("Username or Email") %></label>
+                <label><%- gettext("Username") %></label>
             </td>
             <td>
                 <input type="text" id="user_info" />

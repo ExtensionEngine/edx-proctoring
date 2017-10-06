@@ -3,7 +3,7 @@
 Data models for the proctoring subsystem
 """
 from django.db import models
-from django.db.models import Q
+from django.db.models import F, Q
 from django.db.models.signals import pre_save, pre_delete
 from django.dispatch import receiver
 from model_utils.models import TimeStampedModel
@@ -425,6 +425,21 @@ class ProctoredExamStudentAttemptManager(models.Manager):
 
         return self.filter(filtered_query).order_by('-created')  # pylint: disable=no-member
 
+    def add_allowance_to_attempt(self, user_id, exam_id, minutes=0):
+        """
+        Adds additinal time to the already started attempt(s).
+        """
+        filtered_query = Q(user_id=user_id, proctored_exam__id=exam_id) & (Q(status=ProctoredExamStudentAttemptStatus.started) |
+                                               Q(status=ProctoredExamStudentAttemptStatus.ready_to_submit))
+        attempts = self.filter(filtered_query)
+        attempts.update(allowed_time_limit_mins=F('allowed_time_limit_mins') + minutes, added_allowance=minutes)
+
+    def remove_allowance_from_attempt(self, user_id, exam_id):
+        """
+        Removes the added allowance from attempts.
+        """
+        attempts = self.filter(user_id=user_id, proctored_exam__id=exam_id)
+        attempts.update(allowed_time_limit_mins=F('allowed_time_limit_mins') - F('added_allowance'), added_allowance=0)
 
 class ProctoredExamStudentAttempt(TimeStampedModel):
     """
@@ -455,6 +470,9 @@ class ProctoredExamStudentAttempt(TimeStampedModel):
 
     # this is the time limit allowed to the student
     allowed_time_limit_mins = models.IntegerField()
+
+    # this is the added allowance to the allowed_time_limit_mins
+    added_allowance = models.IntegerField(default=0)
 
     # what is the status of this attempt
     status = models.CharField(max_length=64)
