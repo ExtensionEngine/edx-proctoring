@@ -29,6 +29,9 @@ class ProctoredExam(TimeStampedModel):
     # of course_ware which is the proctored exam.
     content_id = models.CharField(max_length=255, db_index=True)
 
+    # Name of the section in which the exam is located.
+    section_name = models.CharField(max_length=255, blank=True, null=True)
+
     # This will be a integration specific ID - say to SoftwareSecure.
     external_id = models.CharField(max_length=255, null=True, db_index=True)
 

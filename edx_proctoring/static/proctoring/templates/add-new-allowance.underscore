@@ -10,7 +10,7 @@
                 <select id='proctored_exam'>
                     <% _.each(proctored_exams, function(proctored_exam){ %>
                     <option value="<%= proctored_exam.id %>">
-                    <%- interpolate(gettext(' %(exam_display_name)s '), { exam_display_name: proctored_exam.exam_name }, true) %>
+                    <%- interpolate(gettext(' %(exam_display_name)s '), { exam_display_name: proctored_exam.section_name + ' - ' + proctored_exam.exam_name }, true) %>
                     </option>
                     <% }); %>
                 </select>
