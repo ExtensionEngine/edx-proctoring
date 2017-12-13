@@ -117,26 +117,49 @@ var edx = edx || {};
             $errorMessage.empty().append(errorMessage);
             this.updateCss();
         },
-        addAllowance: function (event) {
-            event.preventDefault();
-            var error_response = $('.error-response');
-            error_response.html();
-            var values = this.getCurrentFormValues();
-            var formHasErrors = false;
+        validateAllowanceValue: function (value) {
+            var allowanceKey = 'allowance_value';
 
+            if (value === '') {
+                this.showError(this, allowanceKey, gettext('Required field'));
+            }
+            else if (isNaN(value)) {
+                this.showError(this, allowanceKey, gettext('Additional time must be a number'));
+            }
+            else if (value < 1) {
+                this.showError(this, allowanceKey, gettext('Additional time must be greater than zero'));
+            }
+            else {
+                this.hideError(this, allowanceKey);
+                return true;
+            }
+            return false;
+        },
+        validateAllowanceFields: function (view, values) {
+            var returnValue = view.validateAllowanceValue(values.allowance_value);
 
-            var self = this;
-            $.each(values, function(key, value) {
+            $.each(_.omit(values, 'allowance_value'), function(key, value) {
                 if (value==="") {
-                    formHasErrors = true;
-                    self.showError(self, key, gettext("Required field"));
+                    view.showError(view, key, gettext("Required field"));
+                    returnValue = false;
                 }
                 else {
-                    self.hideError(self, key);
+                    view.hideError(view, key);
                 }
             });
 
-            if (!formHasErrors) {
+            return returnValue;
+        },
+        addAllowance: function (event) {
+            event.preventDefault();
+            var error_response = $('.error-response'),
+                values = this.getCurrentFormValues(),
+                isFormValid = this.validateAllowanceFields(this, values),
+                self = this;
+
+            error_response.html();
+
+            if (isFormValid) {
                 self.model.fetch({
                     headers: {
                         "X-CSRFToken": self.proctored_exam_allowance_view.getCSRFToken()
