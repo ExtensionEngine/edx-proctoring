@@ -105,3 +105,9 @@ class ProctoredExamIllegalStatusTransition(ProctoredBaseException):
     """
     Raised if a state transition is not allowed, e.g. going from submitted to started
     """
+
+
+class ActiveProctoredExamExists(ProctoredBaseException):
+    """
+    Raised if a user tries to start an exam when there is already one active.
+    """
