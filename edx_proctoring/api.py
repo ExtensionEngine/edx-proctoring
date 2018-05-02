@@ -20,6 +20,7 @@ from django.core.mail.message import EmailMessage
 
 from edx_proctoring import constants
 from edx_proctoring.exceptions import (
+    ActiveProctoredExamExists,
     ProctoredExamAlreadyExists,
     ProctoredExamNotFoundException,
     StudentExamAttemptAlreadyExistsException,
@@ -548,6 +549,12 @@ def create_exam_attempt(exam_id, user_id, taking_as_proctored=False):
             ).format(exam_id=exam_id, user_id=user_id)
 
             raise StudentExamAttemptAlreadyExistsException(err_msg)
+
+    active_exams = ProctoredExamStudentAttempt.objects.get_active_student_attempts(user_id)
+    if active_exams:
+        raise ActiveProctoredExamExists(
+            'Cannot start exam for user_id {user_id} because an active exam exists.'.format(user_id=user_id)
+        )
 
     allowed_time_limit_mins = exam['time_limit_mins']
 
@@ -1548,7 +1555,13 @@ def _get_timed_exam_view(exam, context, exam_id, user_id, course_id):
 
     attempt_status = attempt['status'] if attempt else None
     has_due_date = True if exam['due_date'] is not None else False
+
     if not attempt_status:
+        active_exams = ProctoredExamStudentAttempt.objects.get_active_student_attempts(user_id)
+        if active_exams:
+            template = loader.get_template('timed_exam/already_active.html')
+            return template.render({})
+
         if has_due_date_passed(exam['due_date']):
             student_view_template = 'timed_exam/expired.html'
         else:
